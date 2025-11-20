@@ -1,1 +1,33 @@
-There is no greater agony than bearing a untold story inside you a         u a     
+func readd(s string) string {
+	res := ""
+	bools := true
+	opee := false
+	runes:= []rune(s)
+	star := -1
+	end := 0
+	for l,i := range runes {
+		if i == '('{
+			if star != -1 {
+				res += string(runes[star:l])
+			}
+			star = l
+			opee = true
+			bools = false
+			continue
+		} else if i == ')' && star != -1 && opee{
+			end = l
+			bools = true
+			if star != end{
+				res = newstring(string(runes[star:end+1]), res)
+			}
+			star = -1
+			continue
+		} else if bools {
+			res += string(i)
+		}else if  {
+			
+		}
+	}
+	fmt.Println(res)
+	return res
+}
