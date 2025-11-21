@@ -24,8 +24,8 @@ func main() {
 		return
 	}
 	context = []byte(readd(string(context)))
+	context = []byte(cleantext(string(context)))
 	context = []byte(a(string(context)))
-	context = []byte(symbol(string(context)))
 	newfile, newerr := os.OpenFile(os.Args[2], os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0777)
 	if newerr != nil {
 		fmt.Println(newerr)
@@ -258,7 +258,7 @@ func a(s string)string{
 	return res
 }
 func check(s rune) bool{
-	var char = []rune{'a','o','u','e','i','A','O','U','E','I'}
+	var char = []rune{'a','o','u','e','i','h','H','A','O','U','E','I'}
 	for _,i := range char{
 		if i == s {
 			return true
@@ -266,39 +266,6 @@ func check(s rune) bool{
 	}
 	return false
 }
-func symbol(res string)string{
-	words := strings.Split(res," ")
-	var splitSymbol []string
-	ress := ""
-	for i := 0; i < len(words); i++ {
-		if words[i] != "" {
-			if checksymbols(words[i]) {
-				splitSymbol = append(splitSymbol , splitSymbols(words[i])...)
-				ress = TrimSpaceEnd(ress)
-				ress += splitSymbol[0]
-				if len(splitSymbol) == 1 {
-					if i != len(words)-1 {
-						ress += " "
-					}
-				}
-				if len(splitSymbol) == 2 {
-					ress +=splitSymbol[1]
-				}
-				splitSymbol = []string{}
-			}else{
-				ress += words[i]
-				if i != len(words)-1 {
-					ress += " "
-				}
-			}
-		}else{
-			if i != len(words)-1 {
-					ress += " "
-			}
-		}
-	}
-	return ress
-} 
 func checksymbols(s string) bool{
 	var runes = []rune{'.',',','!','?',':',';'}
 	for _, v := range runes {
@@ -308,40 +275,47 @@ func checksymbols(s string) bool{
 	}
 	return false
 }
-func splitSymbols(s string) []string {
-	runes := []rune(s)
-	var slice []string
-	res := ""
-	for l, v := range runes {
-		if( checksymbols(string(v))){
-			res += string(v)
-		}else{
-			slice = append(slice, res)
-			res = ""
-			if l < len(runes) {
-				slice = append(slice, " "+string(runes[l:]))
-			}
-			break
-		}
-	}
-	if res != "" {
-		slice = append(slice, res)
-	}
-	return slice
-}
-
 func TrimSpaceEnd(s string) string {
 	if len(s) == 0 {
 		return ""
 	}
 	runes := []rune(s)
 	i := len(runes)-1;
-	for ; i >= 0; i-- {
-		if runes[i] == ' ' {
-			continue
-		}else{
-			break
-		}
+	for i >= 0 && runes[i] == ' '{
+		i--
 	}
 	return string(runes[:i+1])
+}
+func cleantext(s string) string{
+	runes := []rune(s)
+	res := ""
+	n := len(runes)
+	for i := 0; i < n; i++ {
+		if  checksymbols(string(runes[i])){
+            res = TrimSpaceEnd(res)
+            for i < n && checksymbols(string(runes[i])) {
+                res += string(runes[i])
+                i++
+            }
+            if i >= n {
+                break
+            }
+            for i < n && runes[i] == ' ' {
+                i++
+            }
+			if i >= n {
+                break
+            }
+			if checksymbols(string(runes[i])) {
+				i-=1
+				continue
+			}
+            if i < n {
+                res += " "+string(runes[i])
+            }
+		}else{
+			res += string(runes[i])
+		}
+	}
+	return res
 }
