@@ -1,1 +1,6 @@
-amine . . . . test. .     
+amine a15c (cap, 2) test. .     
+a' a 'a
+a 'a' a*
+  erer '  don't   etse'
+'I'm exactly how they describe me: 'awesome'.
+'I'm exactly how they describe me: 'awesome'.

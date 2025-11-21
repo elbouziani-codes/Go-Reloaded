@@ -319,3 +319,30 @@ func cleantext(s string) string{
 	}
 	return res
 }
+func singlCout(s string)string{
+	OpenSentence := false
+	CloseSentence := false
+	var index []int
+	res := ""
+	runes := []rune(s)
+	for i := 0; i < len(runes); i++ {
+		if !OpenSentence{
+			if i < len(runes)-2 {
+				if i == 0 && runes[i] == '\'' {
+				OpenSentence = true
+				index = append(index, i)
+				continue
+				}else if(runes[i] == '\'' && ){
+					
+				}
+				}	
+		}
+		}else if !CloseSentence{
+
+		}
+		if OpenSentence && CloseSentence {
+			
+		}
+
+	}
+}
