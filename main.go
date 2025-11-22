@@ -6,8 +6,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-
-	"golang.org/x/tools/go/analysis/passes/nilness"
 )
 
 func main() {
@@ -28,6 +26,7 @@ func main() {
 	}
 	context = []byte(readd(string(context)))
 	context = []byte(cleantext(string(context)))
+	context = []byte(fixSingleQuotes(string(context)))
 	context = []byte(a(string(context)))
 	newfile, newerr := os.OpenFile(os.Args[2], os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o777)
 	if newerr != nil {
@@ -226,15 +225,6 @@ func Capitalize(s string) string {
 	}
 	return res
 }
-
-func TrimSpaceend(res string) string {
-	runes := []rune(res)
-	if runes[len(runes)-1] == ' ' {
-		return string(runes[:len(runes)-1])
-	}
-	return res
-}
-
 func ConvertToDicemal(nbr string, x int) (int64, error) {
 	return strconv.ParseInt(nbr, x, 64)
 }
@@ -285,18 +275,6 @@ func checksymbols(s string) bool {
 	return false
 }
 
-func TrimSpaceEnd(s string) string {
-	if len(s) == 0 {
-		return ""
-	}
-	runes := []rune(s)
-	i := len(runes) - 1
-	for i >= 0 && runes[i] == ' ' {
-		i--
-	}
-	return string(runes[:i+1])
-}
-
 func cleantext(s string) string {
 	runes := []rune(s)
 	res := ""
@@ -331,79 +309,94 @@ func cleantext(s string) string {
 	return res
 }
 
-func singlCout(s string) string {
-	OpenCout := false
-	x := -1
-	res := ""
-	after := rune(0)
-	before := rune(0)
+ func fixSingleQuotes(s string) string {
 	runes := []rune(s)
+	res := []rune{}
+	open := -1 // index of opening '
+
 	for i := 0; i < len(runes); i++ {
-		if i+1 < len(runes) {
-			after = runes[i+1]
-		}
-		if i-1 >= 0 {
-			before = runes[i-1]
-		}
-		if isAlpha(before) && runes[i] == '\'' && isAlpha(after) {
-			res += string(runes[i])
-		} else if runes[i] == '\'' {
-			for j := i + 1; j < len(runes) && !OpenCout; j++ {
-				if j+1 < len(runes) {
-					after = runes[j+1]
-				}
-				if j-1 >= 0 {
-					before = runes[j-1]
-				}
-				if isAlpha(before) && runes[j] == '\'' && isAlpha(after) {
-				} else if runes[j] == '\'' {
-					x = j
-					OpenCout = true
-				}
+		r := runes[i]
+
+		if r == '\'' {
+			// تجاهل apostrophe داخل كلمة
+			if i > 0 && i+1 < len(runes) && isAlpha(runes[i-1]) && isAlpha(runes[i+1]) {
+				res = append(res, r)
+				continue
 			}
-			if OpenCout {
-				if len(res) > 0 && CheckCharachterToString(res) && res[len(res)-1] != ' ' {
-    				res += " "
+
+			// فتح quote
+			if open == -1 {
+				open = len(res) // نخزن مكان الفتح
+				// أضف space قبل الquote إذا لم يكن موجود
+				if len(res) > 0 && res[len(res)-1] != ' ' {
+					res = append(res, ' ')
 				}
-				res += string(runes[i])
-				res += strings.TrimSpace(string(runes[i+1 : x]))
-				res += string(runes[x])
-				i = x+1
-				if  runes[i] != ' '{
-					res += " "
+				res = append(res, '\'')
+				continue
+			}
+
+			// غلق quote
+			if open != -1 {
+				// أخذ المحتوى بين quotes وتنظيفه
+				content := strings.TrimSpace(string(res[open+1:]))
+
+				// حذف المحتوى القديم
+				res = res[:open+1]
+
+				// إضافة المحتوى النظيف
+				res = append(res, []rune(content)...)
+
+				// إضافة closing quote
+				res = append(res, '\'')
+
+				// أضف space بعد closing quote إذا كانت لازمة
+				if i+1 < len(runes) && runes[i+1] != ' ' && !checkPunctuation(runes[i+1]) {
+					res = append(res, ' ')
 				}
-				res += string(runes[i])
-				OpenCout = false
+
+				open = -1
+				continue
 			}
 		} else {
-			res += string(runes[i])
+			// الحالة العادية → إضافة الحرف
+			res = append(res, r)
 		}
 	}
-	return res
+
+	return string(res)
 }
 
+// تابع لمساعدة isAlpha
 func isAlpha(r rune) bool {
-	if r == 0{
-		return false
-	}
 	return (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z')
 }
 
-func isNbr(r rune) bool {
-	if r == 0{
-		return false
-	}
-	return (r >= '0' && r <= '9')
-}
-func CheckCharachterToString(res string) bool  {
-	if len(res) == 0 {
-		return false
-	}
-	runes := []rune(res)
-	for i := len(runes)-1; i >= 0; i-- {
-		if isNbr(runes[i]) || isAlpha(runes[i]) {
+// تابع لمساعدة checkPunctuation
+func checkPunctuation(r rune) bool {
+	punct := []rune{'.', ',', '!', '?', ':', ';'}
+	for _, p := range punct {
+		if r == p {
 			return true
 		}
 	}
 	return false
+}
+
+func TrimSpaceEnd(s string) string {
+	if len(s) == 0 {
+		return ""
+	}
+	runes := []rune(s)
+	i := len(runes) - 1
+	for i >= 0 && runes[i] == ' ' {
+		i--
+	}
+	return string(runes[:i+1])
+}
+func TrimSpaceend(res string) string {
+	runes := []rune(res)
+	if runes[len(runes)-1] == ' ' {
+		return string(runes[:len(runes)-1])
+	}
+	return res
 }
