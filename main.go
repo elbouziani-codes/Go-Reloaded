@@ -4,9 +4,12 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strings"
 	"strconv"
+	"strings"
+
+	"golang.org/x/tools/go/analysis/passes/nilness"
 )
+
 func main() {
 	if len(os.Args) != 3 {
 		fmt.Println("Error")
@@ -26,7 +29,7 @@ func main() {
 	context = []byte(readd(string(context)))
 	context = []byte(cleantext(string(context)))
 	context = []byte(a(string(context)))
-	newfile, newerr := os.OpenFile(os.Args[2], os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0777)
+	newfile, newerr := os.OpenFile(os.Args[2], os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o777)
 	if newerr != nil {
 		fmt.Println(newerr)
 		return
@@ -39,7 +42,6 @@ func main() {
 	}
 }
 
-
 func readd(s string) string {
 	runes := []rune(s)
 	res := ""
@@ -48,16 +50,16 @@ func readd(s string) string {
 	inExit := false
 	for _, r := range runes {
 		if r == '(' {
-			if inParen{
+			if inParen {
 				res += "(" + buffer
 			}
 			inParen = true
 			buffer = ""
 			continue
 		}
-		if r == ')' && inParen{
+		if r == ')' && inParen {
 			inParen = false
-			res = newstring("(" + buffer + ")", res)
+			res = newstring("("+buffer+")", res)
 			inExit = true
 			buffer = ""
 			continue
@@ -74,10 +76,11 @@ func readd(s string) string {
 		}
 	}
 	if buffer != "" {
-		res += " (" +buffer
+		res += " (" + buffer
 	}
 	return res
 }
+
 func newstring(style, res string) string {
 	arr := strings.Split(style[1:len(style)-1], ", ")
 
@@ -143,6 +146,7 @@ func newstring(style, res string) string {
 		return res + style + " "
 	}
 }
+
 func newWord(res, nbrword string) (string, string, bool) {
 	n, err := strconv.Atoi(strings.TrimSpace(nbrword))
 	if err != nil || n <= 0 {
@@ -152,7 +156,7 @@ func newWord(res, nbrword string) (string, string, bool) {
 	count := 0
 	for i := len(words) - 1; i >= 0; i-- {
 		if checkWord(words[i]) {
-			count+=1
+			count += 1
 			if count == n {
 				break
 			}
@@ -164,35 +168,36 @@ func newWord(res, nbrword string) (string, string, bool) {
 	if count < n {
 		n = count
 	}
-	i := len(words)-1
+	i := len(words) - 1
 	for ; i >= 0; i-- {
-	    if checkWord(words[i]) && count != 0 {
-	        count-= 1
-	    }
-	    if(count == 0){
-	        break
-	    }
+		if checkWord(words[i]) && count != 0 {
+			count -= 1
+		}
+		if count == 0 {
+			break
+		}
 	}
 	allwords := strings.Join(words[:i], " ")
 	resBefore := strings.Join(words[i:], " ")
-	return allwords ," "+resBefore , true
+	return allwords, " " + resBefore, true
 }
 
 func checkWord(s string) bool {
 	if len(s) == 0 {
 		return false
 	}
-	for _,i := range s{
+	for _, i := range s {
 		if (i >= 'a' && i <= 'z') || (i >= 'A' && i <= 'Z') || (i >= '0' && i <= '9') {
 			return true
 		}
 	}
 	return false
 }
+
 func Capitalize(s string) string {
 	firstword := true
 	res := ""
-	for _,i := range s{
+	for _, i := range s {
 		if firstword {
 			if (i >= 'a' && i <= 'z') || (i >= 'A' && i <= 'Z') || (i >= '0' && i <= '9') {
 				if i >= 'a' && i <= 'z' {
@@ -222,52 +227,56 @@ func Capitalize(s string) string {
 	return res
 }
 
-func TrimSpaceend(res string) string{
+func TrimSpaceend(res string) string {
 	runes := []rune(res)
 	if runes[len(runes)-1] == ' ' {
 		return string(runes[:len(runes)-1])
 	}
 	return res
 }
+
 func ConvertToDicemal(nbr string, x int) (int64, error) {
 	return strconv.ParseInt(nbr, x, 64)
 }
-func a(s string)string{
+
+func a(s string) string {
 	arr := strings.Split(s, " ")
 	for i := 0; i < len(arr)-1; i++ {
-		j := i+1
+		j := i + 1
 		for ; j < len(arr); j++ {
 			if len(arr[j]) > 0 {
 				break
 			}
 		}
-		if(j == len(arr)){
+		if j == len(arr) {
 			break
 		}
-		if arr[i] == "a"{
+		if arr[i] == "a" {
 			if check(rune(arr[j][0])) {
 				arr[i] = "an"
 			}
-		}else if arr[i] == "A"{
+		} else if arr[i] == "A" {
 			if check(rune(arr[j][0])) {
 				arr[i] = "An"
 			}
 		}
 	}
-	res := strings.Join(arr," ")
+	res := strings.Join(arr, " ")
 	return res
 }
-func check(s rune) bool{
-	var char = []rune{'a','o','u','e','i','h','H','A','O','U','E','I'}
-	for _,i := range char{
+
+func check(s rune) bool {
+	char := []rune{'a', 'o', 'u', 'e', 'i', 'h', 'H', 'A', 'O', 'U', 'E', 'I'}
+	for _, i := range char {
 		if i == s {
 			return true
 		}
 	}
 	return false
 }
-func checksymbols(s string) bool{
-	var runes = []rune{'.',',','!','?',':',';'}
+
+func checksymbols(s string) bool {
+	runes := []rune{'.', ',', '!', '?', ':', ';'}
 	for _, v := range runes {
 		if v == rune(s[0]) {
 			return true
@@ -275,74 +284,126 @@ func checksymbols(s string) bool{
 	}
 	return false
 }
+
 func TrimSpaceEnd(s string) string {
 	if len(s) == 0 {
 		return ""
 	}
 	runes := []rune(s)
-	i := len(runes)-1;
-	for i >= 0 && runes[i] == ' '{
+	i := len(runes) - 1
+	for i >= 0 && runes[i] == ' ' {
 		i--
 	}
 	return string(runes[:i+1])
 }
-func cleantext(s string) string{
+
+func cleantext(s string) string {
 	runes := []rune(s)
 	res := ""
 	n := len(runes)
 	for i := 0; i < n; i++ {
-		if  checksymbols(string(runes[i])){
-            res = TrimSpaceEnd(res)
-            for i < n && checksymbols(string(runes[i])) {
-                res += string(runes[i])
-                i++
-            }
-            if i >= n {
-                break
-            }
-            for i < n && runes[i] == ' ' {
-                i++
-            }
+		if checksymbols(string(runes[i])) {
+			res = TrimSpaceEnd(res)
+			for i < n && checksymbols(string(runes[i])) {
+				res += string(runes[i])
+				i++
+			}
 			if i >= n {
-                break
-            }
+				break
+			}
+			for i < n && runes[i] == ' ' {
+				i++
+			}
+			if i >= n {
+				break
+			}
 			if checksymbols(string(runes[i])) {
-				i-=1
+				i -= 1
 				continue
 			}
-            if i < n {
-                res += " "+string(runes[i])
-            }
-		}else{
+			if i < n {
+				res += " " + string(runes[i])
+			}
+		} else {
 			res += string(runes[i])
 		}
 	}
 	return res
 }
-func singlCout(s string)string{
-	OpenSentence := false
-	CloseSentence := false
-	var index []int
+
+func singlCout(s string) string {
+	OpenCout := false
+	x := -1
 	res := ""
+	after := rune(0)
+	before := rune(0)
 	runes := []rune(s)
 	for i := 0; i < len(runes); i++ {
-		if !OpenSentence{
-			if i < len(runes)-2 {
-				if i == 0 && runes[i] == '\'' {
-				OpenSentence = true
-				index = append(index, i)
-				continue
-				}else if(runes[i] == '\'' && ){
-					
+		if i+1 < len(runes) {
+			after = runes[i+1]
+		}
+		if i-1 >= 0 {
+			before = runes[i-1]
+		}
+		if isAlpha(before) && runes[i] == '\'' && isAlpha(after) {
+			res += string(runes[i])
+		} else if runes[i] == '\'' {
+			for j := i + 1; j < len(runes) && !OpenCout; j++ {
+				if j+1 < len(runes) {
+					after = runes[j+1]
 				}
-				}	
+				if j-1 >= 0 {
+					before = runes[j-1]
+				}
+				if isAlpha(before) && runes[j] == '\'' && isAlpha(after) {
+				} else if runes[j] == '\'' {
+					x = j
+					OpenCout = true
+				}
+			}
+			if OpenCout {
+				if len(res) > 0 && CheckCharachterToString(res) && res[len(res)-1] != ' ' {
+    				res += " "
+				}
+				res += string(runes[i])
+				res += strings.TrimSpace(string(runes[i+1 : x]))
+				res += string(runes[x])
+				i = x+1
+				if  runes[i] != ' '{
+					res += " "
+				}
+				res += string(runes[i])
+				OpenCout = false
+			}
+		} else {
+			res += string(runes[i])
 		}
-		}else if !CloseSentence{
-
-		}
-		if OpenSentence && CloseSentence {
-			
-		}
-
 	}
+	return res
+}
+
+func isAlpha(r rune) bool {
+	if r == 0{
+		return false
+	}
+	return (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z')
+}
+
+func isNbr(r rune) bool {
+	if r == 0{
+		return false
+	}
+	return (r >= '0' && r <= '9')
+}
+func CheckCharachterToString(res string) bool  {
+	if len(res) == 0 {
+		return false
+	}
+	runes := []rune(res)
+	for i := len(runes)-1; i >= 0; i-- {
+		if isNbr(runes[i]) || isAlpha(runes[i]) {
+			return true
+		}
+	}
+	return false
 }
