@@ -4,7 +4,7 @@ import (
 	"strings"
 )
 
-func A_change_An(s string) string {
+func AToAn(s string) string {
 	arr := strings.Split(s, " ")
 	for i := 0; i < len(arr)-1; i++ {
 		j := i + 1

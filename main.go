@@ -53,7 +53,7 @@ func StartByNewLine(s string) []byte {
 		slice[i] = goreloaded.ReBuildText(string(slice[i]))
 		slice[i] = goreloaded.Cleantext(string(slice[i]))
 		slice[i] = goreloaded.FixSingleQuotes(string(slice[i]))
-		slice[i] = goreloaded.A_change_An(string(slice[i]))
+		slice[i] = goreloaded.AToAn(string(slice[i]))
 	}
 	s = strings.Join(slice, "\n")
 	return []byte(s)
