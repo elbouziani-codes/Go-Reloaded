@@ -5,7 +5,8 @@ import (
 	"io"
 	"os"
 	"strings"
-	"goreloaded"
+
+	goreloaded "goreloaded/Dependencies"
 )
 
 func main() {
