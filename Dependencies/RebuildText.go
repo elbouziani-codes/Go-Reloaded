@@ -160,10 +160,8 @@ func CheckWord(s string) bool {
 
 func Capitalize(word string) string {
     firstchar := true
-    runes := []rune(word)
     res := ""
-
-    for _, r := range runes {
+    for _, r := range word {
         if r == ' ' {
             res += string(r)
             firstchar = true
