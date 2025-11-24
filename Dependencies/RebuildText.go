@@ -151,7 +151,7 @@ func CheckWord(s string) bool {
 		return false
 	}
 	for _, i := range s {
-		if (i >= 'a' && i <= 'z') || (i >= 'A' && i <= 'Z') || (i >= '0' && i <= '9') {
+		if unicode.IsLetter(i)|| unicode.IsDigit(i) {
 			return true
 		}
 	}
