@@ -3,6 +3,7 @@ package goreloaded
 import (
 	"strconv"
 	"strings"
+	"unicode"
 )
 
 func ReBuildText(s string) string {
@@ -67,21 +68,27 @@ func newstring(style, res string, outSpace bool) string {
 			if !boole {
 				resualt = res + style
 			}
-			return res + strings.ToLower(allwords)
+			for _, v := range allwords {
+				res += string(unicode.ToLower(v))
+			}
+			return res
 		case "up":
 			res, allwords, boole := newWord(res, arr[1])
 			if !boole {
 				resualt = res + style
 			}
-			return res + strings.ToUpper(allwords)
+			for _, v := range allwords {
+				res += string(unicode.ToUpper(v))
+			}
+			return res
 		case "bin":
 			if style == "(bin)" {
-				return HexAndBiniryWord(res, arr[1], style, 2)	
+				return HexAndBiniryWord(res, arr[1], style, 2)
 			}
 			resualt = res + style
 		case "hex":
 			if style == "(hex)" {
-				return HexAndBiniryWord(res, arr[1], style, 16)	
+				return HexAndBiniryWord(res, arr[1], style, 16)
 			}
 			resualt = res + style
 		default:
@@ -96,7 +103,7 @@ func newstring(style, res string, outSpace bool) string {
 }
 
 func newWord(res, nbrword string) (string, string, bool) {
-	n, err := strconv.Atoi(strings.TrimSpace(nbrword))
+	n, err := strconv.Atoi(nbrword)
 	if err != nil {
 		return res, "", false
 	} else if n <= 0 {
@@ -152,26 +159,25 @@ func CheckWord(s string) bool {
 }
 
 func Capitalize(word string) string {
-	firstchar := true
-	runes := []rune(word)
-	res := ""
-	for _, i := range runes {
-		if i == ' '{
-			firstchar = true
-		}
-		if (IsAlpha(i) || (i >= '0' && i <= '9')) && firstchar {
-			if i >= 'a' && i <= 'z' {
-				res += strings.ToUpper(string(i))
-			} else {
-				res += strings.ToUpper(string(i))
-			}
-			firstchar = false
-			continue
-		} else {
-			res += strings.ToLower(string(i))
-		}
-	}
-	return res
+    firstchar := true
+    runes := []rune(word)
+    res := ""
+
+    for _, r := range runes {
+        if r == ' ' {
+            res += string(r)
+            firstchar = true
+            continue
+        }
+
+        if (unicode.IsLetter(r) || unicode.IsDigit(r)) && firstchar {
+            res += string(unicode.ToUpper(r))
+            firstchar = false
+        } else {
+            res += string(unicode.ToLower(r))
+        }
+    }
+    return res
 }
 
 func ConvertToDicemal(nbr string, x int) (int64, error) {
