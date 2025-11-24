@@ -17,13 +17,13 @@ func AToAn(s string) string {
 			break
 		}
 		if len(arr[i]) != 0 {
-			a, bools := Check_A(arr[i])
+			Value, bools := Check_A(arr[i])
 			if bools {
-				if Check(rune(arr[j][0])) {
-					a += "n"
+				if CheckVowel(rune(arr[j][0])) {
+					Value += "n"
 				}
 			}
-			arr[i] = a
+			arr[i] = Value
 		}
 	}
 	res := strings.Join(arr, " ")
@@ -46,7 +46,7 @@ func Check_A(s string) (string, bool) {
 	return s, true
 }
 
-func Check(s rune) bool {
+func CheckVowel(s rune) bool {
 	char := []rune{'a', 'o', 'u', 'e', 'i', 'h', 'H', 'A', 'O', 'U', 'E', 'I'}
 	for _, i := range char {
 		if i == s {

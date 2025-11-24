@@ -11,7 +11,7 @@ func ReBuildText(s string) string {
 	buffer := ""
 	inParen := false
 	inExit := false
-	for _, r := range runes {
+	for l, r := range runes {
 		if r == '(' {
 			if inParen {
 				res += "(" + buffer
@@ -22,7 +22,11 @@ func ReBuildText(s string) string {
 		}
 		if r == ')' && inParen {
 			inParen = false
-			res = newstring("("+buffer+")", res)
+			outSpace := false
+			if l+1 < len(runes) && runes[l+1] == ' ' {
+				outSpace = true
+			}
+			res = newstring("("+buffer+")", res, outSpace)
 			inExit = true
 			buffer = ""
 			continue
@@ -44,70 +48,51 @@ func ReBuildText(s string) string {
 	return res
 }
 
-func newstring(style, res string) string {
+func newstring(style, res string, outSpace bool) string {
 	arr := strings.Split(style[1:len(style)-1], ", ")
-
+	resualt := ""
 	if len(arr) == 1 {
 		arr = append(arr, "1")
-	} else if len(arr) > 2 {
-		return res + style + " "
 	}
-	switch arr[0] {
-	case "cap":
-		res, allwords, boole := newWord(res, arr[1])
-		if !boole {
-			return res + style + " "
-		}
-		return res + Capitalize(allwords)
-	case "low":
-		res, allwords, boole := newWord(res, arr[1])
-		if !boole {
-			return res + style + " "
-		}
-		return res + strings.ToLower(allwords)
-	case "up":
-		res, allwords, boole := newWord(res, arr[1])
-		if !boole {
-			return res + style + " "
-		}
-		return res + strings.ToUpper(allwords)
-	case "bin":
-		res, allwords, boole := newWord(res, arr[1])
-		if !boole {
-			return res + style + " "
-		}
-		arrs := strings.Split(allwords, " ")
-		for i := 0; i < len(arrs); i++ {
-			if arrs[i] != "" {
-				bin, err := ConvertToDicemal(arrs[i], 2)
-				if err != nil {
-					continue
-				}
-				arrs[i] = strconv.Itoa(int(bin))
+	if len(arr) == 2 {
+		switch arr[0] {
+		case "cap":
+			res, allwords, boole := newWord(res, arr[1])
+			if !boole {
+				resualt = res + style
 			}
-		}
-		allwords = strings.Join(arrs, " ")
-		return res + allwords
-	case "hex":
-		res, allwords, boole := newWord(res, arr[1])
-		if !boole {
-			return res + style + " "
-		}
-		arrs := strings.Split(allwords, " ")
-		for i := 0; i < len(arrs); i++ {
-			if arrs[i] != "" {
-				bin, err := ConvertToDicemal(arrs[i], 16)
-				if err != nil {
-					continue
-				}
-				arrs[i] = strconv.Itoa(int(bin))
+			return res + Capitalize(allwords)
+		case "low":
+			res, allwords, boole := newWord(res, arr[1])
+			if !boole {
+				resualt = res + style
 			}
+			return res + strings.ToLower(allwords)
+		case "up":
+			res, allwords, boole := newWord(res, arr[1])
+			if !boole {
+				resualt = res + style
+			}
+			return res + strings.ToUpper(allwords)
+		case "bin":
+			if style == "(bin)" {
+				return HexAndBiniryWord(res, arr[1], style, 2)	
+			}
+			resualt = res + style
+		case "hex":
+			if style == "(hex)" {
+				return HexAndBiniryWord(res, arr[1], style, 16)	
+			}
+			resualt = res + style
+		default:
+			resualt = res + style
 		}
-		allwords = strings.Join(arrs, " ")
-		return res + allwords
-	default:
-		return res + style + " "
 	}
+	resualt = res + style
+	if outSpace {
+		resualt += " "
+	}
+	return resualt
 }
 
 func newWord(res, nbrword string) (string, string, bool) {
@@ -152,4 +137,70 @@ func newWord(res, nbrword string) (string, string, bool) {
 		return allwords, resBefore, true
 	}
 	return allwords, " " + resBefore, true
+}
+
+func CheckWord(s string) bool {
+	if len(s) == 0 {
+		return false
+	}
+	for _, i := range s {
+		if (i >= 'a' && i <= 'z') || (i >= 'A' && i <= 'Z') || (i >= '0' && i <= '9') {
+			return true
+		}
+	}
+	return false
+}
+
+func Capitalize(word string) string {
+	firstchar := true
+	runes := []rune(word)
+	res := ""
+	for _, i := range runes {
+		if i == ' '{
+			firstchar = true
+		}
+		if (IsAlpha(i) || (i >= '0' && i <= '9')) && firstchar {
+			if i >= 'a' && i <= 'z' {
+				res += strings.ToUpper(string(i))
+			} else {
+				res += strings.ToUpper(string(i))
+			}
+			firstchar = false
+			continue
+		} else {
+			res += strings.ToLower(string(i))
+		}
+	}
+	return res
+}
+
+func ConvertToDicemal(nbr string, x int) (int64, error) {
+	return strconv.ParseInt(nbr, x, 64)
+}
+
+func TrimSpacEendOne(res string) string {
+	runes := []rune(res)
+	if runes[len(runes)-1] == ' ' {
+		return string(runes[:len(runes)-1])
+	}
+	return res
+}
+
+func HexAndBiniryWord(res, nbr, style string, x int) string {
+	res, allwords, boole := newWord(res, nbr)
+	if !boole {
+		return res + style + " "
+	}
+	arrs := strings.Split(allwords, " ")
+	for i := 0; i < len(arrs); i++ {
+		if arrs[i] != "" {
+			bin, err := ConvertToDicemal(arrs[i], x)
+			if err != nil {
+				continue
+			}
+			arrs[i] = strconv.Itoa(int(bin))
+		}
+	}
+	allwords = strings.Join(arrs, " ")
+	return res + allwords
 }

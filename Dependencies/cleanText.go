@@ -33,3 +33,15 @@ func Cleantext(s string) string {
 	}
 	return res
 }
+
+func TrimSpaceWhiteEnd(s string) string {
+	if len(s) == 0 {
+		return ""
+	}
+	runes := []rune(s)
+	i := len(runes) - 1
+	for i >= 0 && (runes[i] == ' ' || runes[i] == '\n' || runes[i] == '\t') {
+		i--
+	}
+	return string(runes[:i+1])
+}

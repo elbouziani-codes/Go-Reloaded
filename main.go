@@ -29,10 +29,6 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	// if len(context) >= 102400 {
-	// 	fmt.Println("Error : big Text")
-	// 	return
-	// }
 	context = StartByNewLine(string(context))
 	newfile, newerr := os.OpenFile(os.Args[2], os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o777)
 	if newerr != nil {
