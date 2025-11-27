@@ -32,7 +32,7 @@ func AToAn(s string) string {
 
 func Check_A(s string) (string, bool) {
 	runes := []rune(s)
-	if !strings.HasSuffix(s, "a") {
+	if !strings.HasSuffix(s, "a") && !strings.HasSuffix(s, "A")  {
 		return s, false
 	}
 	for i := len(runes) - 2; i >= 0; i-- {

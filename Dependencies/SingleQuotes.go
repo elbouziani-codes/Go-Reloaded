@@ -15,7 +15,6 @@ func FixSingleQuotes(s string) string {
 				res = append(res, r)
 				continue
 			}
-
 			if open == -1 {
 				open = len(res)
 				if len(res) > 0 && res[len(res)-1] != ' ' && res[len(res)-1] != '\n' && res[len(res)-1] != '\t' {

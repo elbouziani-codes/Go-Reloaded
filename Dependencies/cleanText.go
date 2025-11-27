@@ -40,7 +40,7 @@ func TrimSpaceWhiteEnd(s string) string {
 	}
 	runes := []rune(s)
 	i := len(runes) - 1
-	for i >= 0 && (runes[i] == ' ' || runes[i] == '\n' || runes[i] == '\t') {
+	for i >= 0 && (runes[i] == ' ' || runes[i] == '\n' || runes[i] == '\t') { // (runes[i] >= 9 && runs[i] <= 13) || runes[i] == 32
 		i--
 	}
 	return string(runes[:i+1])
