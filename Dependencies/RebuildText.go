@@ -1,4 +1,5 @@
 package goreloaded
+
 import (
 	"strconv"
 	"strings"
@@ -30,10 +31,10 @@ func ReBuildText(s string) string {
 				continue
 			}
 		}
-		if r == ')' && inParen {			
+		if r == ')' && inParen {
 			if l == len(runes)-1 || (l < len(runes)-1 && runes[l+1] == ' ') {
 				inParen = false
-				res = newstring("("+buffer+")", res, isOpen == 0,l == len(runes)-1)
+				res = newstring("("+buffer+")", res, isOpen == 0, l == len(runes)-1)
 				buffer = ""
 				isOpen = -1
 				SkipSpace = true
@@ -52,7 +53,7 @@ func ReBuildText(s string) string {
 	return res
 }
 
-func newstring(style, res string, first,last bool) string {
+func newstring(style, res string, first, last bool) string {
 	arr := strings.Split(style[1:len(style)-1], ", ")
 	result := ""
 	if len(arr) == 1 {
@@ -94,9 +95,9 @@ func newstring(style, res string, first,last bool) string {
 			}
 		}
 	}
-	result = res +style
+	result = res + style
 	if !last {
-		result += " " 
+		result += " "
 	}
 	return result
 }
@@ -112,7 +113,7 @@ func newWord(res, nbrword, style string) (string, string, bool) {
 		return res, "", true
 	}
 	first := false
-	words := strings.Split(res," ")
+	words := strings.Split(res, " ")
 	count := 0
 	for i := len(words) - 1; i >= 0; i-- {
 		if CheckWord(words[i]) {
@@ -182,17 +183,6 @@ func Capitalize(word string) string {
 
 func ConvertToDicemal(nbr string, x int) (int64, error) {
 	return strconv.ParseInt(nbr, x, 64)
-}
-
-func TrimSpacEendOne(res string) string {
-	if len(res) == 0 {
-		return res
-	}
-	runes := []rune(res)
-	if runes[len(runes)-1] == ' ' {
-		return string(runes[:len(runes)-1])
-	}
-	return res
 }
 
 func HexAndBiniryWord(res, nbr, style string, x int) string {

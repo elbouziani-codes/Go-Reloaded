@@ -6,7 +6,7 @@ func Cleantext(s string) string {
 	n := len(runes)
 	for i := 0; i < n; i++ {
 		if Checksymbols(string(runes[i])) {
-			res = TrimSpaceWhiteEnd(res)
+			res = TrimSpaceAllEnd(res)
 			for i < n && Checksymbols(string(runes[i])) {
 				res += string(runes[i])
 				i++
@@ -34,13 +34,13 @@ func Cleantext(s string) string {
 	return res
 }
 
-func TrimSpaceWhiteEnd(s string) string {
+func TrimSpaceAllEnd(s string) string {
 	if len(s) == 0 {
 		return ""
 	}
 	runes := []rune(s)
 	i := len(runes) - 1
-	for i >= 0 && (runes[i] == ' ' || runes[i] == '\n' || runes[i] == '\t') { // (runes[i] >= 9 && runs[i] <= 13) || runes[i] == 32
+	for i >= 0 && runes[i] == ' '  {
 		i--
 	}
 	return string(runes[:i+1])
